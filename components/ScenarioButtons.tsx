@@ -1,20 +1,18 @@
-"use client";
+const scenarios = [
+  { id: "heatingSpike", label: "Heating spike" },
+  { id: "waterLeak", label: "Possible leak" },
+  { id: "feeJump", label: "Fee jump" },
+];
 
-const labels = [
-  { id: "heatingSpike", label: "Demo: winter heating spike" },
-  { id: "waterLeak", label: "Demo: possible water leak" },
-  { id: "feeJump", label: "Demo: fee jump" },
-] as const;
-
-export function ScenarioButtons({ onPick }: { onPick: (scenarioId: string) => void }) {
+export function ScenarioButtons({ onPick }: { onPick: (id: string) => void }) {
   return (
-    <div className="flex flex-wrap gap-3">
-      {labels.map((item) => (
+    <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+      {scenarios.map((item) => (
         <button
           key={item.id}
           type="button"
           onClick={() => onPick(item.id)}
-          className="rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-accent hover:text-accent"
+          className="shrink-0 rounded-full border border-[#334155] bg-white/5 px-4 py-2 text-sm font-medium text-[#cbd5e1] transition hover:border-[#0891b2]/50 hover:bg-[#0891b2]/10 hover:text-[#06b6d4]"
         >
           {item.label}
         </button>

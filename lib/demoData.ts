@@ -10,7 +10,9 @@ export const demoScenarios: Record<string, BillInput> = {
     previousUsage: 1090,
     weatherDeltaPercent: -14,
     note: "It got colder this month and I used a portable heater in the basement.",
-    fileName: "hydro_january.pdf"
+    fileName: "hydro_january.pdf",
+    locationQuery: "Montreal",
+    weatherSummary: "Recent weather was notably colder than the previous comparison window.",
   },
   waterLeak: {
     utilityType: "water",
@@ -21,7 +23,9 @@ export const demoScenarios: Record<string, BillInput> = {
     previousUsage: 14,
     weatherDeltaPercent: 0,
     note: "No change in occupancy. Nobody was home during one weekend.",
-    fileName: "water_bill_march.pdf"
+    fileName: "water_bill_march.pdf",
+    locationQuery: "Montreal",
+    weatherSummary: "Weather shift was small, so temperature is not a strong explanation here.",
   },
   feeJump: {
     utilityType: "gas",
@@ -32,6 +36,8 @@ export const demoScenarios: Record<string, BillInput> = {
     previousUsage: 63,
     weatherDeltaPercent: -2,
     note: "Usage feels stable. I do not think anything changed.",
-    fileName: "gas_bill_february.pdf"
-  }
+    fileName: "gas_bill_february.pdf",
+    locationQuery: "Montreal",
+    weatherSummary: "Weather changed only slightly, so fees or rate changes matter more here.",
+  },
 };

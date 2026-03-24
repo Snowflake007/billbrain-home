@@ -4,25 +4,33 @@ function round(value: number) {
   return Math.round(value * 100) / 100;
 }
 
-function getSeverity(changePercent: number, usagePercent: number, utilityType: BillInput["utilityType"]): Severity {
+function getSeverity(
+  changePercent: number,
+  usagePercent: number,
+  utilityType: BillInput["utilityType"]
+): Severity {
   if (utilityType === "water" && usagePercent >= 60) return "Urgent";
   if (changePercent >= 30 || usagePercent >= 30) return "Investigate";
   if (changePercent >= 12 || usagePercent >= 12) return "Watch";
   return "Normal";
 }
 
-function buildLikelyCauses(input: BillInput, changePercent: number, usagePercent: number): string[] {
+function buildLikelyCauses(
+  input: BillInput,
+  changePercent: number,
+  usagePercent: number
+): string[] {
   const causes: string[] = [];
 
   if (input.utilityType === "electricity") {
     if (input.weatherDeltaPercent <= -8) {
-      causes.push("Colder weather likely increased heating demand more than usual.");
+      causes.push("Recent weather was colder than the prior comparison window, which likely increased heating demand.");
     }
     if ((input.note || "").toLowerCase().includes("heater")) {
-      causes.push("Your note suggests extra electric heating, which matches the usage jump.");
+      causes.push("Your note mentions extra electric heating, which matches the usage jump.");
     }
     if (usagePercent > changePercent + 6) {
-      causes.push("The rise looks usage-driven more than fee-driven.");
+      causes.push("The spike looks usage-driven more than fee-driven.");
     }
   }
 
@@ -33,6 +41,9 @@ function buildLikelyCauses(input: BillInput, changePercent: number, usagePercent
     if ((input.note || "").toLowerCase().includes("no change")) {
       causes.push("Stable occupancy with higher water use makes the spike harder to explain as normal behavior.");
     }
+    if (Math.abs(input.weatherDeltaPercent) <= 4) {
+      causes.push("Weather does not explain the increase, so equipment or plumbing issues move higher on the list.");
+    }
   }
 
   if (input.utilityType === "gas") {
@@ -40,8 +51,12 @@ function buildLikelyCauses(input: BillInput, changePercent: number, usagePercent
       causes.push("Charges rose even though usage stayed nearly flat, which points to a fee or rate change.");
     }
     if (input.weatherDeltaPercent <= -8) {
-      causes.push("Cooler weather may have contributed slightly, but it does not explain the whole increase.");
+      causes.push("Cooler weather may have contributed, but it does not explain the whole increase.");
     }
+  }
+
+  if (input.weatherSummary) {
+    causes.push(input.weatherSummary);
   }
 
   if (!causes.length) {
@@ -62,10 +77,12 @@ function buildActionPlan(input: BillInput, severity: Severity): string[] {
     actions.push("Check thermostat schedules and any space heaters used this billing period.");
     actions.push("Compare overnight usage or off-hours device activity if you have smart meter access.");
   }
+
   if (input.utilityType === "water") {
     actions.push("Do an overnight leak test: record the meter before bed and compare it in the morning.");
     actions.push("Inspect toilets, irrigation, and the water heater pressure relief line for silent leaks.");
   }
+
   if (input.utilityType === "gas") {
     actions.push("Compare the fee breakdown with the previous bill to spot supplier, delivery, or service-charge changes.");
     actions.push("Check whether heating settings or appliance runtime changed during colder days.");
@@ -84,22 +101,34 @@ function buildActionPlan(input: BillInput, severity: Severity): string[] {
   return actions.slice(0, 4);
 }
 
-function buildSummary(input: BillInput, changePercent: number, severity: Severity, causes: string[]): string {
+function buildSummary(
+  input: BillInput,
+  changePercent: number,
+  severity: Severity,
+  causes: string[]
+): string {
   const utilityName = input.utilityType[0].toUpperCase() + input.utilityType.slice(1);
   return `${utilityName} costs changed by ${round(changePercent)}% vs the previous bill. Severity: ${severity}. Most likely driver: ${causes[0]}`;
 }
 
 export function heuristicAnalysis(input: BillInput): AnalysisResult {
-  const changePercent = ((input.currentTotal - input.previousTotal) / Math.max(input.previousTotal, 1)) * 100;
-  const usagePercent = ((input.currentUsage - input.previousUsage) / Math.max(input.previousUsage, 1)) * 100;
+  const changePercent =
+    ((input.currentTotal - input.previousTotal) / Math.max(input.previousTotal, 1)) * 100;
+  const usagePercent =
+    ((input.currentUsage - input.previousUsage) / Math.max(input.previousUsage, 1)) * 100;
+
   const severity = getSeverity(changePercent, usagePercent, input.utilityType);
   const likelyCauses = buildLikelyCauses(input, changePercent, usagePercent);
   const actionPlan = buildActionPlan(input, severity);
 
-  const blendedChange = (changePercent * 0.65) + (usagePercent * 0.35);
+  const blendedChange = changePercent * 0.65 + usagePercent * 0.35;
   const forecastNextMonth = round(input.currentTotal * (1 + (blendedChange / 100) * 0.2));
-  const forecastRange: [number, number] = [round(forecastNextMonth * 0.92), round(forecastNextMonth * 1.08)];
-  const confidence = severity === "Normal" ? "Low" : severity === "Watch" ? "Medium" : "High";
+  const forecastRange: [number, number] = [
+    round(forecastNextMonth * 0.92),
+    round(forecastNextMonth * 1.08),
+  ];
+  const confidence =
+    severity === "Normal" ? "Low" : severity === "Watch" ? "Medium" : "High";
 
   return {
     summary: buildSummary(input, changePercent, severity, likelyCauses),
@@ -111,7 +140,12 @@ export function heuristicAnalysis(input: BillInput): AnalysisResult {
     actionPlan,
     confidence,
     parsedBill: {
-      provider: input.utilityType === "electricity" ? "Hydro Demo" : input.utilityType === "water" ? "City Water Demo" : "Gas Demo Co.",
+      provider:
+        input.utilityType === "electricity"
+          ? "Hydro Demo"
+          : input.utilityType === "water"
+            ? "City Water Demo"
+            : "Gas Demo Co.",
       billingPeriod: "Prototype demo cycle",
       total: input.currentTotal,
       usage: input.currentUsage,
@@ -127,7 +161,9 @@ export async function analyzeBill(input: BillInput): Promise<AnalysisResult> {
   if (!apiKey) return fallback;
 
   try {
-    const prompt = `You are an energy and utility bill anomaly analyst. Return strict JSON with keys summary, likelyCauses, actionPlan, confidence. Keep it short and practical. Input: ${JSON.stringify(input)}. Heuristic baseline: ${JSON.stringify(fallback)}`;
+    const prompt = `You are a utility bill anomaly analyst. Return strict JSON with keys summary, likelyCauses, actionPlan, confidence. Keep it short and practical. Input: ${JSON.stringify(
+      input
+    )}. Heuristic baseline: ${JSON.stringify(fallback)}`;
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -150,16 +186,24 @@ export async function analyzeBill(input: BillInput): Promise<AnalysisResult> {
     const data = await response.json();
     const raw = data?.choices?.[0]?.message?.content;
     if (!raw) return fallback;
+
     const parsed = JSON.parse(raw);
 
     return {
       ...fallback,
       summary: typeof parsed.summary === "string" ? parsed.summary : fallback.summary,
-      likelyCauses: Array.isArray(parsed.likelyCauses) ? parsed.likelyCauses.slice(0, 4) : fallback.likelyCauses,
-      actionPlan: Array.isArray(parsed.actionPlan) ? parsed.actionPlan.slice(0, 4) : fallback.actionPlan,
-      confidence: parsed.confidence === "Low" || parsed.confidence === "Medium" || parsed.confidence === "High"
-        ? parsed.confidence
-        : fallback.confidence,
+      likelyCauses: Array.isArray(parsed.likelyCauses)
+        ? parsed.likelyCauses.slice(0, 4)
+        : fallback.likelyCauses,
+      actionPlan: Array.isArray(parsed.actionPlan)
+        ? parsed.actionPlan.slice(0, 4)
+        : fallback.actionPlan,
+      confidence:
+        parsed.confidence === "Low" ||
+        parsed.confidence === "Medium" ||
+        parsed.confidence === "High"
+          ? parsed.confidence
+          : fallback.confidence,
     };
   } catch {
     return fallback;

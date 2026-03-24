@@ -10,6 +10,8 @@ export type BillInput = {
   weatherDeltaPercent: number;
   note?: string;
   fileName?: string;
+  locationQuery?: string;
+  weatherSummary?: string;
 };
 
 export type AnalysisResult = {
@@ -27,4 +29,14 @@ export type AnalysisResult = {
     total: number;
     usage: number;
   };
+};
+
+export type WeatherLookupResult = {
+  resolvedName: string;
+  latitude: number;
+  longitude: number;
+  currentWindowAvgC: number;
+  previousWindowAvgC: number;
+  deltaPercent: number;
+  summary: string;
 };
