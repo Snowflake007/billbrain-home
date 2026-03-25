@@ -15,6 +15,7 @@ export type BillInput = {
 };
 
 export type AnalysisResult = {
+  verdict: string;
   summary: string;
   anomalyPercent: number;
   forecastNextMonth: number;
@@ -23,6 +24,7 @@ export type AnalysisResult = {
   likelyCauses: string[];
   actionPlan: string[];
   confidence: "Low" | "Medium" | "High";
+  enterpriseBridge: string;
   parsedBill: {
     provider: string;
     billingPeriod: string;

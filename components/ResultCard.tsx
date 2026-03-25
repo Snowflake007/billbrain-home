@@ -28,6 +28,14 @@ export function ResultCard({ result }: { result: AnalysisResult }) {
             <p className="mt-2 text-xs text-[var(--az-muted-2)]">
               Parsed bill: {result.parsedBill.provider} · {result.parsedBill.billingPeriod}
             </p>
+            <div className="mt-3 rounded-2xl border border-[var(--az-accent-border)] bg-[var(--az-accent-soft)] px-3 py-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--az-muted-2)]">
+                Verdict
+              </p>
+              <p className="mt-2 text-sm leading-6 text-[var(--az-text)]">
+                {result.verdict}
+              </p>
+            </div>
           </div>
 
           <div
@@ -100,6 +108,14 @@ export function ResultCard({ result }: { result: AnalysisResult }) {
             </li>
           ))}
         </ul>
+      </div>
+      <div className="rounded-2xl border border-[var(--az-accent-border)] bg-[var(--az-accent-soft)] p-4">
+        <h4 className="text-sm font-semibold text-[var(--az-text)]">
+          Why this matters for Azility
+        </h4>
+        <p className="mt-3 text-sm leading-6 text-[var(--az-text)]">
+          {result.enterpriseBridge}
+        </p>
       </div>
     </div>
   );
