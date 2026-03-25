@@ -29,8 +29,9 @@
   --az-success: #b9e97b;
 }
 
-html {
-  scroll-behavior: smooth;
+html,
+body {
+  min-height: 100%;
 }
 
 body {
@@ -44,6 +45,11 @@ body {
 
 * {
   box-sizing: border-box;
+}
+
+img {
+  max-width: 100%;
+  display: block;
 }
 
 input,

@@ -109,26 +109,16 @@ export function AnalysisScreen() {
 
         <ResultCard result={result} />
 
-        <div className="grid grid-cols-2 gap-3">
-          <button
-            type="button"
-            onClick={() => router.push("/")}
-            className="rounded-[18px] border border-[var(--az-line)] bg-white/5 px-4 py-4 text-sm font-semibold text-[var(--az-text)] transition hover:bg-white/10"
-          >
-            Back
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              sessionStorage.removeItem(STORAGE_KEY);
-              router.push("/");
-            }}
-            className="rounded-[18px] bg-[var(--az-accent)] px-4 py-4 text-sm font-bold text-[var(--az-button-text)] transition hover:brightness-105"
-          >
-            Try another scenario
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => {
+            sessionStorage.removeItem(STORAGE_KEY);
+            router.push("/");
+          }}
+          className="w-full rounded-[18px] bg-[var(--az-accent)] px-4 py-4 text-sm font-bold text-[var(--az-button-text)] transition hover:brightness-105"
+        >
+          Analyze another bill
+        </button>
       </div>
     </div>
   );

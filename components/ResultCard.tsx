@@ -1,4 +1,5 @@
 import type { AnalysisResult } from "@/lib/types";
+import { AzilityPremiumCard } from "@/components/AzilityPremiumCard";
 
 function severityClasses(severity: AnalysisResult["severity"]) {
   if (severity === "Urgent") {
@@ -32,9 +33,7 @@ export function ResultCard({ result }: { result: AnalysisResult }) {
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--az-muted-2)]">
                 Verdict
               </p>
-              <p className="mt-2 text-sm leading-6 text-[var(--az-text)]">
-                {result.verdict}
-              </p>
+              <p className="mt-2 text-sm leading-6 text-[var(--az-text)]">{result.verdict}</p>
             </div>
           </div>
 
@@ -72,16 +71,12 @@ export function ResultCard({ result }: { result: AnalysisResult }) {
           <p className="text-[11px] uppercase tracking-[0.18em] text-[var(--az-muted-2)]">
             Confidence
           </p>
-          <p className="mt-2 text-2xl font-bold text-[var(--az-text)]">
-            {result.confidence}
-          </p>
+          <p className="mt-2 text-2xl font-bold text-[var(--az-text)]">{result.confidence}</p>
         </div>
       </div>
 
       <div className="rounded-2xl border border-[var(--az-line)] bg-white/5 p-4">
-        <h4 className="text-sm font-semibold text-[var(--az-text)]">
-          Likely causes
-        </h4>
+        <h4 className="text-sm font-semibold text-[var(--az-text)]">Likely causes</h4>
         <ul className="mt-3 space-y-2 text-sm leading-6 text-[var(--az-muted)]">
           {result.likelyCauses.map((cause) => (
             <li
@@ -95,9 +90,7 @@ export function ResultCard({ result }: { result: AnalysisResult }) {
       </div>
 
       <div className="rounded-2xl border border-[var(--az-line)] bg-white/5 p-4">
-        <h4 className="text-sm font-semibold text-[var(--az-text)]">
-          Action plan
-        </h4>
+        <h4 className="text-sm font-semibold text-[var(--az-text)]">Action plan</h4>
         <ul className="mt-3 space-y-2 text-sm leading-6 text-[var(--az-muted)]">
           {result.actionPlan.map((action) => (
             <li
@@ -109,14 +102,8 @@ export function ResultCard({ result }: { result: AnalysisResult }) {
           ))}
         </ul>
       </div>
-      <div className="rounded-2xl border border-[var(--az-accent-border)] bg-[var(--az-accent-soft)] p-4">
-        <h4 className="text-sm font-semibold text-[var(--az-text)]">
-          Why this matters for Azility
-        </h4>
-        <p className="mt-3 text-sm leading-6 text-[var(--az-text)]">
-          {result.enterpriseBridge}
-        </p>
-      </div>
+
+      <AzilityPremiumCard compact />
     </div>
   );
 }
