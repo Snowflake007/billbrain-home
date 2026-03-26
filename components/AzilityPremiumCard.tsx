@@ -18,7 +18,7 @@ export function AzilityPremiumCard({
           <img
             src="/azility-icon.png"
             alt="Azility icon"
-            className="h-11 w-11 rounded-2xl border border-white/10 object-cover"
+            className="h-11 w-11 object-contain"
           />
 
           <div className="min-w-0 flex-1">
@@ -34,9 +34,9 @@ export function AzilityPremiumCard({
 
       <div className="space-y-4 px-4 py-4">
         <img
-            src="/azility-wordmark.png"
-            alt="Azility smarter energy management"
-            className="mx-auto w-[85%] rounded-2xl border border-white/10"
+          src="/azility-wordmark.png"
+          alt="Azility smarter energy management"
+          className="mx-auto w-[85%] object-contain"
         />
 
         <p className="text-sm leading-6 text-[var(--az-text-soft)]">

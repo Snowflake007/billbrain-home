@@ -2,11 +2,10 @@ import type { ReactNode } from "react";
 
 type PhoneShellProps = {
   title: string;
-  subtitle: string;
   children: ReactNode;
 };
 
-export function PhoneShell({ title, subtitle, children }: PhoneShellProps) {
+export function PhoneShell({ title, children }: PhoneShellProps) {
   return (
     <main className="min-h-screen px-3 py-4 sm:px-6">
       <div className="mx-auto w-full max-w-[430px]">
@@ -31,9 +30,6 @@ export function PhoneShell({ title, subtitle, children }: PhoneShellProps) {
                   <h1 className="text-xl font-semibold leading-tight text-[var(--az-text)]">
                     {title}
                   </h1>
-                  <p className="mt-1 text-sm leading-6 text-[var(--az-muted)]">
-                    {subtitle}
-                  </p>
                 </div>
 
                 <div className="shrink-0 rounded-full border border-[var(--az-line)] bg-white/5 px-3 py-1 text-xs font-medium text-[var(--az-text-soft)]">

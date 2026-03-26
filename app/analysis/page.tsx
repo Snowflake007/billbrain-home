@@ -4,8 +4,7 @@ import { PhoneShell } from "@/components/PhoneShell";
 export default function AnalysisPage() {
   return (
     <PhoneShell
-      title="Bill analysis"
-      subtitle="AI explanation, severity, likely causes, action steps, and an upgrade path that actually looks intentional."
+      title="Bill Analysis"
     >
       <AnalysisScreen />
     </PhoneShell>
