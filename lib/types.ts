@@ -12,6 +12,21 @@ export type BillInput = {
   fileName?: string;
   locationQuery?: string;
   weatherSummary?: string;
+  extractedProvider?: string;
+  extractedBillingPeriod?: string;
+};
+
+export type BillExtractionResult = {
+  provider: string | null;
+  billingPeriod: string | null;
+  utilityType: BillInput["utilityType"] | "unknown";
+  currentTotal: number | null;
+  previousTotal: number | null;
+  currentUsage: number | null;
+  previousUsage: number | null;
+  serviceAddressCity: string | null;
+  confidence: "Low" | "Medium" | "High";
+  warnings: string[];
 };
 
 export type AnalysisResult = {

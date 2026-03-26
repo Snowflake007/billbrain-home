@@ -2,7 +2,12 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { AnalysisResult, BillInput, WeatherLookupResult } from "@/lib/types";
+import type {
+  AnalysisResult,
+  BillExtractionResult,
+  BillInput,
+  WeatherLookupResult,
+} from "@/lib/types";
 import { demoScenarios } from "@/lib/demoData";
 import { AzilityPremiumCard } from "@/components/AzilityPremiumCard";
 
@@ -35,6 +40,8 @@ const defaultState: FlowState = {
   weatherSummary: "Recent weather appears colder than the prior comparison window.",
   providerName: "Hydro-Québec",
   accountLabel: "home@example.com",
+  extractedProvider: undefined,
+  extractedBillingPeriod: undefined,
 };
 
 const providerOptions = ["Hydro-Québec", "Énergir", "Veolia", "Custom API"] as const;
@@ -112,6 +119,10 @@ export function AnalyzerForm() {
   const [weatherLoading, setWeatherLoading] = useState(false);
   const [weatherError, setWeatherError] = useState("");
   const [uploadName, setUploadName] = useState(defaultState.fileName || "");
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [extracting, setExtracting] = useState(false);
+  const [extractError, setExtractError] = useState("");
+  const [extractWarnings, setExtractWarnings] = useState<string[]>([]);
 
   const currentStep = steps[stepIndex];
 
@@ -237,6 +248,63 @@ export function AnalyzerForm() {
     }
   }
 
+  async function handleExtractFromUpload() {
+    if (!uploadedFile) {
+      setExtractError("Pick an image or PDF first.");
+      return;
+    }
+
+    setExtracting(true);
+    setExtractError("");
+    setExtractWarnings([]);
+
+    try {
+      const body = new FormData();
+      body.set("file", uploadedFile);
+
+      const response = await fetch("/api/extract-bill", {
+        method: "POST",
+        body,
+      });
+
+      const data = (await response.json()) as
+        | BillExtractionResult
+        | { error?: string };
+
+      if (!response.ok) {
+        throw new Error(
+          "error" in data ? data.error || "Extraction failed." : "Extraction failed."
+        );
+      }
+
+      if (!("utilityType" in data)) {
+        throw new Error("Invalid extraction response.");
+      }
+
+      setExtractWarnings(data.warnings || []);
+
+      setForm((current) => ({
+        ...current,
+        utilityType:
+          data.utilityType !== "unknown" ? data.utilityType : current.utilityType,
+        currentTotal: data.currentTotal ?? current.currentTotal,
+        previousTotal: data.previousTotal ?? current.previousTotal,
+        currentUsage: data.currentUsage ?? current.currentUsage,
+        previousUsage: data.previousUsage ?? current.previousUsage,
+        locationQuery: data.serviceAddressCity ?? current.locationQuery,
+        extractedProvider: data.provider ?? current.extractedProvider,
+        extractedBillingPeriod:
+          data.billingPeriod ?? current.extractedBillingPeriod,
+      }));
+    } catch (error) {
+      setExtractError(
+        error instanceof Error ? error.message : "Could not read the uploaded bill."
+      );
+    } finally {
+      setExtracting(false);
+    } 
+  }
+
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     setLoading(true);
@@ -254,8 +322,9 @@ export function AnalyzerForm() {
         fileName: uploadName || form.fileName,
         locationQuery: form.locationQuery,
         weatherSummary: form.weatherSummary,
+        extractedProvider: form.extractedProvider,
+        extractedBillingPeriod: form.extractedBillingPeriod,
       };
-
       const response = await fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -449,10 +518,82 @@ export function AnalyzerForm() {
                 type="file"
                 accept=".pdf,image/*"
                 onChange={(event) => {
-                  const file = event.target.files?.[0];
+                  const file = event.target.files?.[0] || null;
+                  setUploadedFile(file);
                   setUploadName(file?.name || "demo_bill.pdf");
+                  setExtractError("");
+                  setExtractWarnings([]);
                 }}
               />
+              <button
+                type="button"
+                onClick={handleExtractFromUpload}
+                disabled={!uploadedFile || extracting}
+                className="mt-3 w-full rounded-[18px] border border-[var(--az-accent-border)] bg-[var(--az-accent-soft)] px-4 py-3 text-sm font-semibold text-[var(--az-text)] transition hover:bg-[var(--az-accent-soft-2)] disabled:opacity-60"
+              >
+                {extracting ? "Reading bill with AI..." : "Read bill with AI"}
+              </button>
+
+              {extractError ? (
+                <p className="mt-3 text-sm text-[#ffe1e1]">{extractError}</p>
+              ) : null}
+
+              {form.currentUsage || form.currentTotal ? (
+                <div className="mt-3 rounded-2xl border border-[var(--az-accent-border)] bg-[var(--az-accent-soft)] p-3">
+                  <p className="text-[11px] uppercase tracking-[0.18em] font-semibold text-[var(--az-text)]">
+                    📊 Extracted data
+                  </p>
+                  <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
+                    {form.currentTotal ? (
+                      <div>
+                        <p className="text-xs text-[var(--az-muted)]">Current Total</p>
+                        <p className="mt-1 font-semibold text-[var(--az-text)]">${form.currentTotal}</p>
+                      </div>
+                    ) : null}
+                    {form.previousTotal ? (
+                      <div>
+                        <p className="text-xs text-[var(--az-muted)]">Previous Total</p>
+                        <p className="mt-1 font-semibold text-[var(--az-text)]">${form.previousTotal}</p>
+                      </div>
+                    ) : null}
+                    {form.currentUsage ? (
+                      <div>
+                        <p className="text-xs text-[var(--az-muted)]">Current Usage</p>
+                        <p className="mt-1 font-semibold text-[var(--az-text)]">
+                          {form.currentUsage} {form.utilityType === "water" ? "gal" : form.utilityType === "electricity" ? "kWh" : "m³"}
+                        </p>
+                      </div>
+                    ) : null}
+                    {form.previousUsage ? (
+                      <div>
+                        <p className="text-xs text-[var(--az-muted)]">Previous Usage</p>
+                        <p className="mt-1 font-semibold text-[var(--az-text)]">
+                          {form.previousUsage} {form.utilityType === "water" ? "gal" : form.utilityType === "electricity" ? "kWh" : "m³"}
+                        </p>
+                      </div>
+                    ) : null}
+                  </div>
+                  {form.extractedProvider || form.locationQuery ? (
+                    <div className="mt-3 pt-3 border-t border-[rgba(255,255,255,0.1)] text-xs text-[var(--az-muted)]">
+                      {form.extractedProvider && <p>Provider: {form.extractedProvider}</p>}
+                      {form.locationQuery && <p>Location: {form.locationQuery}</p>}
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
+
+              {extractWarnings.length ? (
+                <div className="mt-3 rounded-2xl border border-[var(--az-line)] bg-white/5 p-3">
+                  <p className="text-[11px] uppercase tracking-[0.18em] text-[var(--az-muted-2)]">
+                    ⚠️ Extraction notes
+                  </p>
+                  <ul className="mt-2 space-y-1 text-sm leading-6 text-[var(--az-muted)]">
+                    {extractWarnings.map((warning) => (
+                      <li key={warning}>• {warning}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
             </div>
           ) : null}
 
@@ -707,6 +848,12 @@ export function AnalyzerForm() {
                   ? `Loaded demo: ${demoCards.find((card) => card.id === selectedDemo)?.title}`
                   : "Manual numbers entered directly in-app."}
           </p>
+          {form.extractedProvider || form.extractedBillingPeriod ? (
+            <p className="mt-2 text-xs leading-5 text-[var(--az-muted-2)]">
+              Parsed bill: {form.extractedProvider || "Unknown provider"}
+              {form.extractedBillingPeriod ? ` · ${form.extractedBillingPeriod}` : ""}
+            </p>
+          ) : null}
         </div>
 
         <div className="grid grid-cols-2 gap-3">

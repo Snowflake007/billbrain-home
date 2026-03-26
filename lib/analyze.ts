@@ -492,12 +492,13 @@ export function heuristicAnalysis(input: BillInput): AnalysisResult {
     enterpriseBridge,
     parsedBill: {
       provider:
-        input.utilityType === "electricity"
+        input.extractedProvider ||
+        (input.utilityType === "electricity"
           ? "Hydro Demo"
           : input.utilityType === "water"
             ? "City Water Demo"
-            : "Gas Demo Co.",
-      billingPeriod: "Prototype demo cycle",
+            : "Gas Demo Co."),
+      billingPeriod: input.extractedBillingPeriod || "Prototype demo cycle",
       total: input.currentTotal,
       usage: input.currentUsage,
     },
