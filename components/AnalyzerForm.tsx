@@ -65,7 +65,7 @@ const inputMethods = [
   },
   {
     key: "connect" as const,
-    title: "Connect CRM / API",
+    title: "Connect via MCP / API",
     description: "Simulate a provider or system connection for premium workflows.",
     badge: "Premium",
     icon: "🔌",
@@ -628,7 +628,7 @@ export function AnalyzerForm() {
               </div>
 
               <label className="block text-sm font-medium text-[var(--az-text)]">
-                Account or CRM identifier
+                Account or MCP identifier
                 <input
                   className="mt-2 w-full rounded-2xl border border-[var(--az-line)] bg-white/5 px-3 py-3 text-[var(--az-text)] placeholder:text-[var(--az-muted-2)]"
                   type="text"
