@@ -25,7 +25,7 @@ export function WelcomeStep() {
             <p className="text-sm font-semibold text-[var(--az-text)]">Get an AI explanation and action plan</p>
           </div>
           <div className="rounded-2xl border border-[var(--az-line)] bg-white/5 px-4 py-3">
-            <p className="text-sm font-semibold text-[var(--az-text)]">Push premium monitoring with Azility</p>
+            <p className="text-sm font-semibold text-[var(--az-text)]">Scale up with Azility</p>
           </div>
         </div>
       </div>

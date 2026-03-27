@@ -220,7 +220,7 @@ function ConnectSection({ form, onUpdate }: ConnectSectionProps) {
       <div>
         <p className="text-sm font-semibold text-[var(--az-text)]">Connected billing source</p>
         <p className="mt-1 text-xs leading-5 text-[var(--az-muted-2)]">
-          This is the premium-style connected path.
+          Connect to your utility provider or MCP for real-time data.
         </p>
       </div>
 

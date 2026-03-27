@@ -16,9 +16,6 @@ export function MethodStep({ form, onUpdate }: MethodStepProps) {
         <h2 className="mt-2 text-2xl font-semibold text-[var(--az-text)]">
           Choose how to start
         </h2>
-        <p className="mt-2 text-sm leading-6 text-[var(--az-muted)]">
-          Pick one entry path. The app should branch cleanly here, not dump every field at once.
-        </p>
       </div>
 
       <div className="space-y-3">

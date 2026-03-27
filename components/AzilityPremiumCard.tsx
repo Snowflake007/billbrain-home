@@ -23,10 +23,10 @@ export function AzilityPremiumCard({
 
           <div className="min-w-0 flex-1">
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--az-accent)]">
-              Premium upgrade
+              Enterprise scale
             </p>
             <h3 className="mt-1 text-lg font-semibold text-[var(--az-text)]">
-              Unlock Azility Premium
+              Ready to scale up?
             </h3>
           </div>
         </div>
@@ -41,16 +41,18 @@ export function AzilityPremiumCard({
 
         <p className="text-sm leading-6 text-[var(--az-text-soft)]">
           {compact
-            ? "Connect provider data, track buildings continuously, and get smarter anomaly alerts."
-            : "Connect provider data, sync building systems, and move from one-off bill checks to continuous utility intelligence."}
+            ? "Have a business? Track buildings at enterprise scale with real-time provider connections and advanced anomaly detection."
+            : "Have a business that needs these features at enterprise scale? Connect directly to Azility for continuous utility intelligence, multi-building management, and advanced analytics."}
         </p>
 
-        <button
-          type="button"
-          className="w-full rounded-[18px] bg-[var(--az-accent)] px-4 py-4 text-sm font-bold text-[var(--az-button-text)] transition hover:brightness-105"
+        <a
+          href="https://www.azility.co/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block w-full rounded-[18px] bg-[var(--az-accent)] px-4 py-4 text-sm font-bold text-[var(--az-button-text)] text-center transition hover:brightness-105"
         >
-          Upgrade to Azility Premium
-        </button>
+          Learn more about Azility
+        </a>
       </div>
     </div>
   );
